@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001
+      author: movies2
+      changes:
+        - createTable:
+            tableName: directors
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: country
+                  type: VARCHAR(120)
+
+        - addUniqueConstraint:
+            tableName: directors
+            columnNames: name
+            constraintName: uq_director_name

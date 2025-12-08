@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004
+      author: movies2
+      context: test
+      changes:
+        - insert:
+            tableName: directors
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: name
+                  value: "Christopher Nolan"
+              - column:
+                  name: country
+                  value: "UK"
+
+        - insert:
+            tableName: directors
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: name
+                  value: "Quentin Tarantino"
+              - column:
+                  name: country
+                  value: "USA"
