@@ -1,0 +1,102 @@
+### Create movie
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Interstellar",
+  "year": 2014,
+  "rating": 8.7,
+  "directorId": 1
+}
+
+###
+
+### Get movie by ID
+GET http://localhost:8080/api/movies/1
+Accept: application/json
+
+###
+
+### Update movie
+PUT http://localhost:8080/api/movies/1
+Content-Type: application/json
+
+{
+  "title": "Inception2",
+  "year": 2010,
+  "rating": 8.8,
+  "directorId": 1
+}
+
+###
+
+### Delete movie
+DELETE http://localhost:8080/api/movies/1
+
+###
+
+### Movies pagination + filter
+POST http://localhost:8080/api/movies/_list
+Content-Type: application/json
+
+{
+  "directorId": 1,
+  "yearFrom": 2000,
+  "yearTo": 2025,
+  "page": 0,
+  "size": 20
+}
+
+###
+
+### Movies report
+POST http://localhost:8080/api/movies/_report
+Content-Type: application/json
+
+{
+  "directorId": 1
+}
+
+###
+
+### Movies upload
+POST http://localhost:8080/api/movies/upload
+Content-Type: application/json
+
+{
+  "movies": [
+    { "title": "Dunkirk", "year": 2017, "rating": 7.9, "directorName": "Christopher Nolan" },
+    { "title": "Kill Bill", "year": 2003, "rating": 8.1, "directorName": "Quentin Tarantino" }
+  ]
+}
+
+### Get all directors
+GET http://localhost:8080/api/directors
+Accept: application/json
+
+###
+
+### Create director
+POST http://localhost:8080/api/directors
+Content-Type: application/json
+
+{
+  "name": "Christopher Nolan",
+  "country": "United Kingdom"
+}
+
+###
+
+### Update director
+PUT http://localhost:8080/api/directors/1
+Content-Type: application/json
+
+{
+  "name": "Christopher Nolan",
+  "country": "United Kingdom"
+}
+
+###
+
+### Delete director
+DELETE http://localhost:8080/api/directors/1
