@@ -12,7 +12,7 @@ import lombok.Setter;
         name = "movies",
         indexes = {
                 @Index(name = "idx_movie_director", columnList = "director_id"),
-                @Index(name = "idx_movie_year", columnList = "year")
+                @Index(name = "idx_movie_yearReleased", columnList = "yearReleased")
         }
 )
 public class MovieEntity {
@@ -23,7 +23,8 @@ public class MovieEntity {
     @Column(nullable = false)
     private String title;
 
-    private Integer year;
+    @Column(name = "year_released")
+    private Integer yearReleased;
 
     private String genres;
 

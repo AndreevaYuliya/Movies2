@@ -5,5 +5,4 @@ databaseChangeLog:
       file: db/changelog/changes/002-create-movie-table.yaml
   - include:
       file: db/changelog/changes/003-insert-directors.yaml
-  - include:
-      file: db/changelog/changes/004-insert-directors-test.yaml
+

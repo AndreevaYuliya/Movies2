@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 
 public record MovieRequestDto(
         @NotBlank String title,
-        @Min(1880) @Max(2100) Integer year,
+        @Min(1880) @Max(2100) Integer yearReleased,
         String genres,
         Double rating,
         @NotNull Long directorId

@@ -47,7 +47,7 @@ public class MovieService {
 
         MovieEntity movie = new MovieEntity();
         movie.setTitle(dto.title());
-        movie.setYear(dto.year());
+        movie.setYearReleased(dto.yearReleased());
         movie.setGenres(dto.genres());
         movie.setRating(dto.rating());
         movie.setDirector(director);
@@ -75,7 +75,7 @@ public class MovieService {
         Director director = directorService.getByIdOrThrow(dto.directorId());
 
         movie.setTitle(dto.title());
-        movie.setYear(dto.year());
+        movie.setYearReleased(dto.yearReleased());
         movie.setGenres(dto.genres());
         movie.setRating(dto.rating());
         movie.setDirector(director);
@@ -105,7 +105,7 @@ public class MovieService {
                 .map(m -> new MovieListItemDto(
                         m.getId(),
                         m.getTitle(),
-                        m.getYear(),
+                        m.getYearReleased(),
                         m.getDirector().getName()
                 ))
                 .toList();
@@ -125,7 +125,7 @@ public class MovieService {
         for (MovieEntity m : result.getContent()) {
             sb.append(m.getId()).append(",");
             sb.append(escapeCsv(m.getTitle())).append(",");
-            sb.append(m.getYear() != null ? m.getYear() : "").append(",");
+            sb.append(m.getYearReleased() != null ? m.getYearReleased() : "").append(",");
             sb.append(escapeCsv(m.getGenres())).append(",");
             sb.append(m.getRating() != null ? m.getRating() : "").append(",");
             sb.append(escapeCsv(m.getDirector().getName())).append("\n");
@@ -165,7 +165,7 @@ public class MovieService {
 
                 MovieEntity movie = new MovieEntity();
                 movie.setTitle(dto.title());
-                movie.setYear(dto.year());
+                movie.setYearReleased(dto.yearReleased());
                 movie.setGenres(dto.genres());
                 movie.setRating(null); // rating does not exist in upload JSON
                 movie.setDirector(director);
@@ -197,7 +197,7 @@ public class MovieService {
         return new MovieDetailsDto(
                 m.getId(),
                 m.getTitle(),
-                m.getYear(),
+                m.getYearReleased(),
                 m.getGenres(),
                 m.getRating(),
                 new MovieDetailsDto.DirectorInfo(

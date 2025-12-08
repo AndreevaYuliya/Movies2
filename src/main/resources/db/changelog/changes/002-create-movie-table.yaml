@@ -19,7 +19,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: year
+                  name: year_released
                   type: INTEGER
               - column:
                   name: genres
@@ -48,8 +48,8 @@ databaseChangeLog:
                   name: director_id
 
         - createIndex:
-            indexName: idx_movie_year
+            indexName: idx_movie_year_released
             tableName: movies
             columns:
               - column:
-                  name: year
+                  name: year_released

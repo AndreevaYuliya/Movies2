@@ -3,7 +3,7 @@ package com.movies2.movie.dto;
 public record MovieDetailsDto(
         Long id,
         String title,
-        Integer year,
+        Integer yearReleased,
         String genres,
         Double rating,
         DirectorInfo director

@@ -13,10 +13,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.liquibase.enabled=false")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@TestPropertySource("classpath:application-test.properties")
+
 class DirectorControllerTest {
 
     @Autowired
