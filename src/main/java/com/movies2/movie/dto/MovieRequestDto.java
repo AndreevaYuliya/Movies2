@@ -1,12 +1,16 @@
 package com.movies2.movie.dto;
 
-import org.antlr.v4.runtime.misc.NotNull;
+import com.movies2.movie.validation.CurrentOrPastYear;
 import jakarta.validation.constraints.*;
 
 public record MovieRequestDto(
         @NotBlank String title,
-        @Min(1880) @Max(2100) Integer yearReleased,
+        String image,
+        String description,
+        @CurrentOrPastYear Integer yearReleased,
         String genres,
+        @DecimalMin("0.0")
+        @DecimalMax("10.0")
         Double rating,
         @NotNull Long directorId
 ) { }

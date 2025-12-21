@@ -15,10 +15,10 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/movies")
-class MovieControllerIT {
+class MovieController {
     private final MovieService service;
 
-    public MovieControllerIT(MovieService service) {
+    public MovieController(MovieService service) {
         this.service = service;
     }
 

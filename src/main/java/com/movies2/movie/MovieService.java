@@ -27,6 +27,16 @@ public class MovieService {
     private final DirectorService directorService;
     private final ObjectMapper objectMapper;
 
+    private void applyDto(MovieEntity movie, MovieRequestDto dto, Director director) {
+        movie.setTitle(dto.title());
+        movie.setImage(dto.image());
+        movie.setDescription(dto.description());
+        movie.setYearReleased(dto.yearReleased());
+        movie.setGenres(dto.genres());
+        movie.setRating(dto.rating());
+        movie.setDirector(director);
+    }
+
     public MovieService(
             MovieRepository movieRepo,
             DirectorRepository directorRepo,
@@ -46,11 +56,7 @@ public class MovieService {
         Director director = directorService.getByIdOrThrow(dto.directorId());
 
         MovieEntity movie = new MovieEntity();
-        movie.setTitle(dto.title());
-        movie.setYearReleased(dto.yearReleased());
-        movie.setGenres(dto.genres());
-        movie.setRating(dto.rating());
-        movie.setDirector(director);
+        applyDto(movie, dto, director);
 
         movieRepo.save(movie);
         return toDetailsDto(movie);
@@ -74,11 +80,7 @@ public class MovieService {
 
         Director director = directorService.getByIdOrThrow(dto.directorId());
 
-        movie.setTitle(dto.title());
-        movie.setYearReleased(dto.yearReleased());
-        movie.setGenres(dto.genres());
-        movie.setRating(dto.rating());
-        movie.setDirector(director);
+        applyDto(movie, dto, director);
 
         return toDetailsDto(movie);
     }
@@ -87,7 +89,11 @@ public class MovieService {
     // DELETE
     // ----------------------------------------------------------------------
     public void delete(Long id) {
+        if (!movieRepo.existsById(id)) {
+            throw new EntityNotFoundException("Movie not found");
+        }
         movieRepo.deleteById(id);
+        movieRepo.flush();
     }
 
     // ----------------------------------------------------------------------
@@ -105,6 +111,7 @@ public class MovieService {
                 .map(m -> new MovieListItemDto(
                         m.getId(),
                         m.getTitle(),
+                        m.getImage(),
                         m.getYearReleased(),
                         m.getDirector().getName()
                 ))
@@ -197,6 +204,8 @@ public class MovieService {
         return new MovieDetailsDto(
                 m.getId(),
                 m.getTitle(),
+                m.getImage(),
+                m.getDescription(),
                 m.getYearReleased(),
                 m.getGenres(),
                 m.getRating(),

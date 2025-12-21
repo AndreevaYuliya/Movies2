@@ -25,6 +25,8 @@ class DirectorControllerTest {
     @Autowired
     DirectorRepository directorRepository;
 
+    private Long directorId;
+
     @BeforeEach
     void setup() {
         // очистити БД перед кожним тестом
@@ -36,6 +38,8 @@ class DirectorControllerTest {
         d.setName("Initial Director");
         d.setCountry("USA");
         directorRepository.saveAndFlush(d);
+
+        directorId = d.getId();
     }
 
     @Test
@@ -52,12 +56,15 @@ class DirectorControllerTest {
     @Test
     void testGetDirectors() throws Exception {
         mvc.perform(get("/api/directors"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("Initial Director"));
     }
 
     @Test
     void testUpdateDirector() throws Exception {
-        mvc.perform(put("/api/directors/1")
+        mvc.perform(put("/api/directors/" + directorId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                             {"name":"Christopher Nolan Updated","country":"UK"}

@@ -31,13 +31,16 @@ public class MovieRepositoryImpl implements MovieRepositoryCustom {
             p.add(cb.equal(root.get("director").get("id"), f.directorId()));
 
         if (f.yearFrom() != null)
-            p.add(cb.greaterThanOrEqualTo(root.get("year"), f.yearFrom()));
+            p.add(cb.greaterThanOrEqualTo(root.get("yearReleased"), f.yearFrom()));
 
         if (f.yearTo() != null)
-            p.add(cb.lessThanOrEqualTo(root.get("year"), f.yearTo()));
+            p.add(cb.lessThanOrEqualTo(root.get("yearReleased"), f.yearTo()));
 
         if (f.genreContains() != null && !f.genreContains().isBlank())
             p.add(cb.like(cb.lower(root.get("genres")), "%" + f.genreContains().toLowerCase() + "%"));
+
+        if (f.title() != null && !f.title().isBlank())
+            p.add(cb.like(cb.lower(root.get("title")), "%" + f.title().toLowerCase() + "%"));
 
         cq.where(p.toArray(Predicate[]::new));
         cq.orderBy(cb.asc(root.get("id")));
@@ -53,8 +56,25 @@ public class MovieRepositoryImpl implements MovieRepositoryCustom {
         // COUNT
         CriteriaQuery<Long> countQ = cb.createQuery(Long.class);
         Root<MovieEntity> countRoot = countQ.from(MovieEntity.class);
+        List<Predicate> countPredicates = new ArrayList<>();
+
+        if (f.directorId() != null)
+            countPredicates.add(cb.equal(countRoot.get("director").get("id"), f.directorId()));
+
+        if (f.yearFrom() != null)
+            countPredicates.add(cb.greaterThanOrEqualTo(countRoot.get("yearReleased"), f.yearFrom()));
+
+        if (f.yearTo() != null)
+            countPredicates.add(cb.lessThanOrEqualTo(countRoot.get("yearReleased"), f.yearTo()));
+
+        if (f.genreContains() != null && !f.genreContains().isBlank())
+            countPredicates.add(cb.like(cb.lower(countRoot.get("genres")), "%" + f.genreContains().toLowerCase() + "%"));
+
+        if (f.title() != null && !f.title().isBlank())
+            countPredicates.add(cb.like(cb.lower(countRoot.get("title")), "%" + f.title().toLowerCase() + "%"));
+
         countQ.select(cb.count(countRoot));
-        countQ.where(p.toArray(Predicate[]::new));
+        countQ.where(countPredicates.toArray(Predicate[]::new));
         Long total = em.createQuery(countQ).getSingleResult();
 
         return new PageImpl<>(items, pageable, total);

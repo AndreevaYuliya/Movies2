@@ -23,6 +23,12 @@ public class MovieEntity {
     @Column(nullable = false)
     private String title;
 
+    @Column(nullable = true)
+    private String image;
+
+    @Column(nullable = true)
+    private String description;
+
     @Column(name = "year_released")
     private Integer yearReleased;
 

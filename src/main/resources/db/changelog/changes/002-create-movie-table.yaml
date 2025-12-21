@@ -19,6 +19,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: image
+                  type: VARCHAR(300)
+              - column:
+                  name: description
+                  type: VARCHAR(300)
+              - column:
                   name: year_released
                   type: INTEGER
               - column:

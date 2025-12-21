@@ -4,8 +4,11 @@ Content-Type: application/json
 
 {
   "title": "Interstellar",
-  "year_released": 2014,
-  "rating": 8.7,
+  "image": "",
+  "description": "",
+  "yearReleased": 2014,
+  "rating": 2.3,
+  "genres": "Fantasy, Adventure",
   "directorId": 1
 }
 
@@ -23,7 +26,7 @@ Content-Type: application/json
 
 {
   "title": "Inception2",
-  "year_released": 2010,
+  "yearReleased": 2017,
   "rating": 8.8,
   "directorId": 1
 }
@@ -41,10 +44,23 @@ Content-Type: application/json
 
 {
   "directorId": 1,
+  "title": "Titanic",
   "yearFrom": 2000,
   "yearTo": 2025,
   "page": 0,
   "size": 20
+}
+
+###
+
+### Movies pagination + filter
+POST http://localhost:8080/api/movies/_list
+Content-Type: application/json
+
+{
+"title": "Interstellar",
+"page": 0,
+"size": 10
 }
 
 ###
@@ -63,12 +79,22 @@ Content-Type: application/json
 POST http://localhost:8080/api/movies/upload
 Content-Type: application/json
 
-{
-  "movies": [
-    { "title": "Dunkirk", "year_released": 2017, "rating": 7.9, "directorName": "Christopher Nolan" },
-    { "title": "Kill Bill", "year_released": 2003, "rating": 8.1, "directorName": "Quentin Tarantino" }
-  ]
-}
+[
+  {
+    "title": "Dunkirk",
+    "director": "Christopher Nolan",
+    "year": 2017,
+    "genres": "War"
+  },
+  {
+    "title": "Kill Bill",
+    "director": "Quentin Tarantino",
+    "year": 2003,
+    "genres": "Action"
+  }
+]
+
+###
 
 ### Get all directors
 GET http://localhost:8080/api/directors
