@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Inception",
+    "director": "Christopher Nolan",
+    "yearReleased": 2010,
+    "genres": "Sci-Fi"
+  },
+  {
+    "title": "Pulp Fiction",
+    "director": "Quentin Tarantino",
+    "yearReleased": 1994,
+    "genres": "Crime"
+  }
+]

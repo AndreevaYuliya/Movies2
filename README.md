@@ -1,233 +1,91 @@
-# 📚 Movie Catalog Service
+# Movies2
 
-### Spring Boot • PostgreSQL • Liquibase • REST API • Many-to-One • File Upload • Reports
+Monorepo with:
+- `movies2-app`: REST API for Movies/Directors (many-to-one) with Liquibase, filtering, reports, upload.
+- `email-service`: Kafka consumer + SMTP sender + retry + Elasticsearch storage of email statuses.
+- `email-api`: shared DTO (`EmailSendCommand`) for producer/consumer.
 
-A Spring Boot REST API service built for managing **Movies** (Entity 1)
-and **Directors** (Entity 2).\
-The system demonstrates a **many-to-one relationship**, supports JSON
-import, pagination with filtering,\
-CSV/Excel report generation, and uses Liquibase for schema management.
+---
 
-------------------------------------------------------------------------
+## Architecture & flow
+- Movies app (Java 21, Spring Boot) persists Movies/Directors (Postgres, Liquibase).
+- On movie creation, movies-app publishes Kafka message `email.send` (JSON `EmailSendCommand` with `subject/content/recipients`).
+- Email-service (Spring Boot) consumes `email.send`, saves to Elasticsearch index `email_messages`, sends via SMTP, and retries failed every 5 minutes (@EnableScheduling). Status/error stored in ES.
+- docker-compose brings infra: Kafka+Zookeeper, Postgres, Elasticsearch, Kibana, email-service.
 
-# 🧩 Domain Model
+Ports (default):
+- movies-app: 8080 (run locally)
+- email-service: 8081 (via compose)
+- Kafka: 9092 (external), 29092 (internal)
+- Postgres: 5432
+- Elasticsearch: 9200
+- Kibana: 5601
 
-## 🎬 Entity 1: Movie
+---
 
-  Field        Type      Required   Description
-  ------------ --------- ---------- ----------------------------------
-  id           Long      yes        Primary key
-  title        String    yes        Movie title
-  year         Integer   yes        Release year
-  genres       String    no         Optional, comma-separated values
-  directorId   Long      yes        Foreign key to Director
+## Quick start (Docker Compose: infra + email-service)
+Prereqs: Docker running.
+1) Configure `email-service/.env` (SMTP_HOST/PORT/USER/PASS, ELASTIC_URI, KAFKA_BOOTSTRAP=kafka:29092).
+2) From repo root: `docker compose up --build -d`
+3) Check: `docker compose ps` (kafka, zookeeper, postgres, elasticsearch, kibana, email-service).
+4) Stop: `docker compose down`
+Movies app не в compose — запускайте отдельно (ниже).
 
-## 🎭 Entity 2: Director
+---
 
-  Field   Type     Required       Description
-  ------- -------- -------------- ---------------
-  id      Long     yes            Primary key
-  name    String   yes + unique   Director name
+## Local run (apps)
+Prereqs: Java 21, Maven, Postgres at `localhost:5432` (db/user/pass `postgres`), Kafka at `localhost:9092`.
+- movies-app: `mvn -pl movies2-app spring-boot:run`
+- email-service: `mvn -pl email-service spring-boot:run` (set `KAFKA_BOOTSTRAP=localhost:9092`, `ELASTIC_URI=http://localhost:9200`, SMTP envs)
+API: `http://localhost:8080/api/...`
 
-------------------------------------------------------------------------
+---
 
-# 🔗 Many-to-One Relationship Explained
+## Tests
+- All modules: `mvn test`
+- Per module: `mvn -pl movies2-app test` or `mvn -pl email-service test`
 
-A director may have **many movies**, but each movie references exactly
-**one director**.
+---
 
-    Director 1 ─┬── Movie A
-                ├── Movie B
-                └── Movie C
+## Key endpoints (movies2-app)
+- `POST /api/movies` — create movie
+- `GET /api/movies/{id}`
+- `PUT /api/movies/{id}`
+- `DELETE /api/movies/{id}`
+- `POST /api/movies/_list` — filter + pagination
+- `POST /api/movies/_report` — CSV
+- `POST /api/movies/upload` — multipart file upload (JSON array with `title`, `director`, `yearReleased`, `genres`)
+- Directors CRUD: `/api/directors`
 
-JPA mapping:
-
-``` java
-@ManyToOne
-@JoinColumn(name = "director_id", nullable = false)
-private Director director;
+Upload sample (multipart file):
+```json
+[
+  {"title":"Inception","director":"Christopher Nolan","yearReleased":2010,"genres":"Sci-Fi"}
+]
 ```
 
-------------------------------------------------------------------------
+---
 
-# 🚀 Features
-
-✔ CRUD endpoints for Movies\
-✔ CRUD endpoints for Directors\
-✔ Many-to-one relationship with FK\
-✔ JSON file upload → validate → bulk insert\
-✔ Filtering & pagination at DB level\
-✔ CSV / Excel report generation\
-✔ Liquibase-based schema creation + initial data\
-✔ Integration tests for all endpoints\
-✔ PostgreSQL (no Docker required)
-
-------------------------------------------------------------------------
-
-# 🛢 PostgreSQL Setup (No Docker)
-
-### 1. Install PostgreSQL
-
-Download:\
-https://www.postgresql.org/download/
-
-During setup configure:
-
--   **User:** postgres\
--   **Password:** postgres\
--   **Port:** 5432
-
-### 2. Create database
-
-In pgAdmin or psql:
-
-``` sql
-CREATE DATABASE movies;
+## Message contract (email.send)
+Topic: `email.send`  
+Payload (`com.movies2.email.EmailSendCommand`):
+```json
+{
+  "subject": "New entity created",
+  "content": "A new entity was created in Movies2",
+  "recipients": ["admin@movies.com"]
+}
 ```
 
-### 3. Application configuration (`application.yml`)
+---
 
-``` yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/movies
-    username: postgres
-    password: postgres
+## Elasticsearch
+- Index: `email_messages`
+- Stored fields: subject, content, recipients, status (NEW/SENT/FAILED), errorMessage, attempt, lastAttemptAt, createdAt.
+- Kibana: `http://localhost:5601` → create data view `email_messages*` to browse status history.
 
-  jpa:
-    hibernate:
-      ddl-auto: none
+---
 
-  liquibase:
-    enabled: true
-```
-
-------------------------------------------------------------------------
-
-# 📦 Liquibase Migration
-
-Liquibase automatically:
-
--   Creates tables for Movie & Director\
--   Adds FK constraints\
--   Adds unique constraints (director name)\
--   Creates indexes for pagination filters\
--   Inserts initial Director values
-
-Example structure:
-
-    src/main/resources/db/changelog/
-     ├── master.xml
-     ├── changes/
-     │   ├── 001-create-tables.xml
-     │   ├── 002-insert-directors.xml
-
-------------------------------------------------------------------------
-
-# 📡 REST API Endpoints
-
-## 🎬 Movies (Entity 1)
-
-### ➕ Create Movie
-
-`POST /api/movies`
-
-### 🔍 Get Movie by ID
-
-`GET /api/movies/{id}`
-
-Returns director object inside movie.
-
-### ✏ Update Movie
-
-`PUT /api/movies/{id}`
-
-### 🗑 Delete Movie
-
-`DELETE /api/movies/{id}`
-
-### 📃 List Movies (Filtering + Pagination)
-
-`POST /api/movies/_list`
-
-### 📊 Export Report
-
-`POST /api/movies/_report`
-
-### 📁 JSON Upload
-
-`POST /api/movies/upload`
-
-------------------------------------------------------------------------
-
-## 🎭 Directors (Entity 2)
-
-### 📃 List All
-
-`GET /api/directors`
-
-### ➕ Create Director
-
-`POST /api/directors`
-
-### ✏ Update
-
-`PUT /api/directors/{id}`
-
-### 🗑 Delete
-
-`DELETE /api/directors/{id}`
-
-------------------------------------------------------------------------
-
-# 🧪 Integration Tests
-
-✔ Spring Boot Test\
-✔ MockMvc\
-✔ Liquibase test schema\
-✔ Validation tests\
-✔ Upload tests\
-✔ Report export tests
-
-Run tests:
-
-``` sh
-mvn test
-```
-
-------------------------------------------------------------------------
-
-# ▶ Run the Application
-
-``` sh
-mvn spring-boot:run
-```
-
-App starts with:
-
--   PostgreSQL connection\
--   Liquibase migrations\
--   REST API available at:\
-    `http://localhost:8080/api/...`
-
-------------------------------------------------------------------------
-
-# 📥 Sample JSON for Upload
-
-Place in:
-
-    src/main/resources/sample/movies.json
-
-------------------------------------------------------------------------
-
-# 🎯 Summary
-
-This project demonstrates:
-
--   Clean REST API architecture\
--   Many-to-one relationship modeling\
--   PostgreSQL schema versioning\
--   Efficient filtering & pagination\
--   Report generation\
--   JSON import workflow\
--   Full integration test coverage
+## Notes
+- movies2-app uses shared `email-api` for the Kafka DTO; it does not include email-service code on its classpath.
+- email-service SMTP defaults: from `.env` (host/port/user/pass). In compose mapped to port 8081.***
