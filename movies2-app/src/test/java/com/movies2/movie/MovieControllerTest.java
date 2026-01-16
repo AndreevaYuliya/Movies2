@@ -156,6 +156,24 @@ class MovieControllerTest {
     }
 
     // ----------------------------------------------------------------------
+    // REPORT
+    // ----------------------------------------------------------------------
+    @Test
+    void testReport() throws Exception {
+        mvc.perform(post("/api/movies/_report")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                              "page": 0,
+                              "size": 10
+                            }
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("movies_report.csv")))
+                .andExpect(content().contentType("text/csv"));
+    }
+
+    // ----------------------------------------------------------------------
     // UPLOAD
     // ----------------------------------------------------------------------
     @Test

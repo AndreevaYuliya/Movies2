@@ -201,12 +201,8 @@ public class MovieService {
     // HELPERS
     // ----------------------------------------------------------------------
     private Director findDirectorByName(String name) {
-        return directorRepo.findAll().stream()
-                .filter(d -> d.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Director not found: " + name
-                ));
+        return directorRepo.findByNameIgnoreCase(name)
+                .orElseThrow(() -> new EntityNotFoundException("Director not found: " + name));
     }
 
     private MovieDetailsDto toDetailsDto(MovieEntity m) {

@@ -73,4 +73,10 @@ class DirectorControllerTest {
                 .andExpect(jsonPath("$.name").value("Christopher Nolan Updated"))
                 .andExpect(jsonPath("$.country").value("UK"));
     }
+
+    @Test
+    void testDeleteDirector() throws Exception {
+        mvc.perform(delete("/api/directors/" + directorId))
+                .andExpect(status().isNoContent());
+    }
 }
