@@ -1,0 +1,48 @@
+spring:
+  application.name: gateway
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      routes:
+        - id: reviews
+          uri: http://movies-be:3000
+          predicates: [ Path=/api/reviews/** ]
+        - id: movies
+          uri: http://movies2-app:8080
+          predicates: [ Path=/api/** ]
+        - id: profile
+          uri: http://movies2-app:8080
+          predicates: [ Path=/profile/** ]
+        - id: notifications
+          uri: http://email-service:8081
+          predicates: [ Path=/notifications/** ]
+        - id: email
+          uri: http://email-service:8081
+          predicates: [ Path=/email/** ]
+  security:
+    oauth2:
+      client:
+        registration:
+          auth:
+            provider: auth
+            client-id: gateway
+            client-secret: gateway-secret
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/login/oauth2/code/auth
+            scope: openid,profile,email
+        provider:
+          auth:
+            authorization-uri: ${AUTH_AUTHORIZATION_URI:http://auth-server:9000/oauth2/authorize}
+            token-uri: ${AUTH_TOKEN_URI:http://auth-server:9000/oauth2/token}
+            jwk-set-uri: ${AUTH_JWKS_URI:http://auth-server:9000/oauth2/jwks}
+            user-info-uri: ${AUTH_USERINFO_URI:http://auth-server:9000/userinfo}
+            user-name-attribute: sub
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_JWKS_URI:http://auth-server:9000/oauth2/jwks}
+
+server:
+  port: 8080
+  forward-headers-strategy: framework

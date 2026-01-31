@@ -28,6 +28,11 @@ class MovieController {
         return service.create(dto);
     }
 
+    @PostMapping("/_list")
+    public MovieListResponseDto list(@RequestBody MovieListRequestDto filter) {
+        return service.list(filter);
+    }
+
     @GetMapping("/{id}")
     public MovieDetailsDto get(@PathVariable Long id) {
         return service.getById(id);
@@ -42,11 +47,6 @@ class MovieController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
-    }
-
-    @PostMapping("/_list")
-    public MovieListResponseDto list(@RequestBody MovieListRequestDto filter) {
-        return service.list(filter);
     }
 
     @PostMapping("/_report")

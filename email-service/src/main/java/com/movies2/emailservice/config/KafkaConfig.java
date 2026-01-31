@@ -27,14 +27,12 @@ public class KafkaConfig {
     @Value("${app.kafka.group-id:email-service}")
     private String groupId;
 
-    // ---------- PRODUCER ----------
     @Bean
     public ProducerFactory<String, EmailSendCommand> producerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        // чтобы не добавлялись type headers (если нужно)
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         return new DefaultKafkaProducerFactory<>(props);
     }
@@ -44,7 +42,6 @@ public class KafkaConfig {
         return new KafkaTemplate<>(producerFactory());
     }
 
-    // ---------- CONSUMER ----------
     @Bean
     public ConsumerFactory<String, EmailSendCommand> consumerFactory() {
         JsonDeserializer<EmailSendCommand> valueDeserializer = new JsonDeserializer<>(EmailSendCommand.class);

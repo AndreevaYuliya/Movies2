@@ -28,6 +28,4 @@ public class EmailMessage {
     private Instant createdAt;
 
     public enum Status { NEW, SENT, FAILED }
-
-    // getters/setters/constructors
 }

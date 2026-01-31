@@ -8,6 +8,9 @@ import com.movies2.director.DirectorService;
 import com.movies2.movie.dto.*;
 import com.movies2.service.EmailProducer;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.kafka.common.KafkaException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.movies2.movie.dto.*;
 
@@ -23,6 +26,8 @@ import java.util.List;
 @Service
 @Transactional
 public class MovieService {
+
+    private static final Logger log = LoggerFactory.getLogger(MovieService.class);
 
     private final EmailProducer emailProducer;
 
@@ -64,9 +69,9 @@ public class MovieService {
         MovieEntity movie = new MovieEntity();
         applyDto(movie, dto, director);
 
-        movieRepo.save(movie);
-
         emailProducer.sendCreatedNotification("admin@movies.com");
+
+        movieRepo.save(movie);
 
         return toDetailsDto(movie);
     }

@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.3.13</version>
         <relativePath/>
     </parent>
 
@@ -21,11 +21,41 @@
         <module>email-api</module>
         <module>email-service</module>
         <module>movies2-app</module>
+        <module>gateway</module>
+        <module>auth-server</module>
     </modules>
+
 
     <properties>
         <java.version>21</java.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Align Netty to patched version (MadeYouReset, Brotli zip-bomb) -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.1.125.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Reactor BOM (includes reactor-netty 1.1.x) -->
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-bom</artifactId>
+                <version>2023.0.19</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- BouncyCastle DOS fix -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.79</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>

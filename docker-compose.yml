@@ -27,6 +27,15 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
@@ -53,7 +62,8 @@ services:
       - "5601:5601"
 
   email-service:
-    build: .
+    build:
+      context: ./email-service
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -61,12 +71,88 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
+      auth-server:
+        condition: service_started
     env_file: ./email-service/.env
     ports:
       - "8081:8080"
+    environment:
+      AUTH_SERVER_ISSUER: http://auth-server:9000
 
   mailhog:
     image: mailhog/mailhog:v1.0.1
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  movies2-app:
+    build:
+      context: ./movies2-app
+    environment:
+      AUTH_SERVER_ISSUER: http://auth-server:9000
+      KAFKA_BOOTSTRAP: kafka:29092
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - postgres
+      - kafka
+    ports:
+      - "8082:8080"
+
+  movies-be:
+    build:
+      context: ../../Projects/yuliia/movies-be
+    environment:
+      PORT: 3000
+      NODE_ENV: dev
+      MONGO_URI: mongodb://mongo:27017/movies_reviews
+      MOVIES_SERVICE_URL: http://gateway:8080/api/movies
+      AUTH_ISSUER: http://auth-server:9000
+      AUTH_JWKS_URI: http://auth-server:9000/oauth2/jwks
+      AUTH_AUDIENCE: gateway
+    depends_on:
+      - mongo
+      - auth-server
+      - gateway
+    ports:
+      - "3000:3000"
+
+  auth-server:
+    build:
+      context: ./auth-server
+    environment:
+      AUTH_SERVER_ISSUER: http://auth-server:9000
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GATEWAY_REDIRECT_URI: http://localhost:8080/login/oauth2/code/auth
+      AUTH_RSA_PRIVATE: ${AUTH_RSA_PRIVATE}
+      AUTH_RSA_PUBLIC: ${AUTH_RSA_PUBLIC}
+      SPRING_SECURITY_USER_NAME: admin
+      SPRING_SECURITY_USER_PASSWORD: admin
+    ports:
+      - "9000:9000"
+
+  gateway:
+    build:
+      context: ./gateway
+    environment:
+      AUTH_SERVER_ISSUER: http://auth-server:9000
+      AUTH_AUTHORIZATION_URI: http://localhost:9000/oauth2/authorize
+      AUTH_TOKEN_URI: http://auth-server:9000/oauth2/token
+      AUTH_JWKS_URI: http://auth-server:9000/oauth2/jwks
+      AUTH_USERINFO_URI: http://auth-server:9000/userinfo
+    depends_on:
+      - auth-server
+      - movies2-app
+      - email-service
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
+  mongodata:
+
+
+

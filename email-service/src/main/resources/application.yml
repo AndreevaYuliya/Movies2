@@ -22,6 +22,12 @@ spring:
       properties:
         spring.json.add.type.headers: false
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_JWKS_URI:http://auth-server:9000/oauth2/jwks}
+
 app:
   kafka:
     topic: email.send

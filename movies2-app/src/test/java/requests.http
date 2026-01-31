@@ -97,6 +97,7 @@ Content-Type: application/json
 ###
 
 ### Get all directors
+
 GET http://localhost:8080/api/directors
 Accept: application/json
 

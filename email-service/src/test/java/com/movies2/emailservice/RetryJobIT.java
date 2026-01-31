@@ -32,7 +32,6 @@ class EmailSendingServiceIT {
 
     @Test
     void trySend_success_setsStatusSent_andClearsError() {
-        // given
         EmailMessage msg = new EmailMessage();
         msg.setSubject("Hello");
         msg.setContent("Body");
@@ -44,10 +43,8 @@ class EmailSendingServiceIT {
 
         doNothing().when(mailSender).send(any(SimpleMailMessage.class));
 
-        // when
         service.trySend(msg);
 
-        // then
         EmailMessage saved = repo.findById(msg.getId()).orElseThrow();
         assertThat(saved.getStatus()).isEqualTo(EmailMessage.Status.SENT);
         assertThat(saved.getErrorMessage()).isNull();
@@ -59,7 +56,6 @@ class EmailSendingServiceIT {
 
     @Test
     void trySend_fail_setsStatusFailed_andStoresError() {
-        // given
         EmailMessage msg = new EmailMessage();
         msg.setSubject("Hello");
         msg.setContent("Body");
@@ -72,10 +68,8 @@ class EmailSendingServiceIT {
         doThrow(new RuntimeException("smtp down"))
                 .when(mailSender).send(any(SimpleMailMessage.class));
 
-        // when
         service.trySend(msg);
 
-        // then
         EmailMessage saved = repo.findById(msg.getId()).orElseThrow();
         assertThat(saved.getStatus()).isEqualTo(EmailMessage.Status.FAILED);
         assertThat(saved.getErrorMessage()).contains("RuntimeException").contains("smtp down");

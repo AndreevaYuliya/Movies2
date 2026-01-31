@@ -19,9 +19,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(properties = {
-        // важно: в тестах Kafka должна смотреть на embedded брокер
         "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-        // если у тебя listener на конкретной группе — можно оставить дефолт
         "spring.kafka.consumer.auto-offset-reset=earliest"
 })
 @EmbeddedKafka(partitions = 1, topics = {"email.send"})
@@ -34,23 +32,19 @@ class KafkaListenerIT {
     @MockBean
     EmailMessageRepository repo;
 
-    // если у тебя есть JavaMailSender в listener/service — лучше замокать
     @MockBean
     org.springframework.mail.javamail.JavaMailSender mailSender;
 
     @Test
     void shouldConsumeKafkaMessageAndSaveToRepository() {
-        // given
         EmailSendCommand cmd = new EmailSendCommand(
                 "Hello",
                 "Test content",
                 List.of("user@test.com")
         );
 
-        // when
         kafkaTemplate.send("email.send", cmd);
 
-        // then (ждём пока listener обработает)
         ArgumentCaptor<EmailMessage> captor = ArgumentCaptor.forClass(EmailMessage.class);
 
         verify(repo, timeout(3000).times(1)).save(captor.capture());

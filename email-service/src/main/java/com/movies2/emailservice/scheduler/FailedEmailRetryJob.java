@@ -17,7 +17,7 @@ public class FailedEmailRetryJob {
         this.service = service;
     }
 
-    @Scheduled(fixedDelayString = "PT5M") // ISO-8601, 5 minutes
+    @Scheduled(fixedDelayString = "PT5M")
     public void retryFailed() {
         var failed = repo.findTop100ByStatusOrderByLastAttemptAtAsc(EmailMessage.Status.FAILED);
         for (var msg : failed) {
