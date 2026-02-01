@@ -104,6 +104,8 @@ services:
   movies-be:
     build:
       context: ../../Projects/yuliia/movies-be
+      dockerfile: Dockerfile
+    image: movies-be:latest
     environment:
       PORT: 3000
       NODE_ENV: dev
