@@ -4,6 +4,9 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeperdata:/var/lib/zookeeper/data
+      - zookeeperlog:/var/lib/zookeeper/log
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -18,6 +21,8 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafkadata:/var/lib/kafka/data
 
   postgres:
     image: postgres:16-alpine
@@ -45,6 +50,8 @@ services:
       - xpack.security.http.ssl.enabled=false
     ports:
       - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
     healthcheck:
       test: [ "CMD-SHELL", "bash -c ': > /dev/tcp/127.0.0.1/9200'" ]
       interval: 10s
@@ -103,7 +110,7 @@ services:
 
   movies-be:
     build:
-      context: ../../Projects/yuliia/movies-be
+      context: ../Projects/yuliia/movies-be
       dockerfile: Dockerfile
     image: movies-be:latest
     environment:
@@ -155,6 +162,10 @@ services:
 volumes:
   pgdata:
   mongodata:
+  esdata:
+  kafkadata:
+  zookeeperdata:
+  zookeeperlog:
 
 
 
